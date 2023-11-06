@@ -1,4 +1,4 @@
-export type RegisterUser = {
+export type RegisterUserRequest = {
     id: string;
     email: string;
     firstName: string;
@@ -7,12 +7,12 @@ export type RegisterUser = {
     role: 'ADMIN' | 'USER';
 };
 
-export type LoginUser = {
+export type LoginUserRequest = {
     email: string;
     password: string;
 }
 
 export type AuthResponse = {
     jwt: string;
-    user: RegisterUser;
+    user: RegisterUserRequest;
 };

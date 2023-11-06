@@ -4,7 +4,7 @@ const { AuthRoutes } = namedImport(() => import('@features/auth'), 'AuthRoutes')
 
 export const publicRoutes = [
     {
-        path: '/auth/*',
+        path: 'auth/*',
         element: <AuthRoutes />,
     },
 ];

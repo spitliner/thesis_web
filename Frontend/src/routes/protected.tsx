@@ -1,4 +1,5 @@
-import {ContentLayout, MainLayout} from '@components/Layout';
+import {MainLayout} from '@components/Layout';
+import {MessagesRoutes} from "@features/messages/routes";
 
 
 export const protectedRoutes = [
@@ -6,8 +7,7 @@ export const protectedRoutes = [
         path: '/*',
         element: <MainLayout/>,
         children: [
-            {index: true, element: <ContentLayout title="title here">Content heres</ContentLayout>},
-            // {path: '/users', element: <Users/>},
+            {path: 'messages/*', element: <MessagesRoutes/>},
             // {path: '/profile', element: <Profile/>},
             // {path: '/', element: <Dashboard/>},
             // {path: '*', element: <Navigate to="."/>},
