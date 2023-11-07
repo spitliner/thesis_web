@@ -8,10 +8,12 @@ export const Messages = () => {
             <div className="card-header d-flex justify-content-between align-items-center p-3">
                 <ChatTitle/>
             </div>
-            <div className="card-body" style={{position: 'relative', height: '400px'}}>
+            <div className="card-body p-2 overflow-auto"
+                 style={{position: 'relative', height: '200px'}}>
                 <ChatContent/>
             </div>
-            <div className="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+            <div
+                className="card-footer text-muted d-flex justify-content-start align-items-center p-3">
                 <ChatInput/>
             </div>
         </div>
