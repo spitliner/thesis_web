@@ -1,27 +1,42 @@
+import dotenv from 'dotenv';
+import mongoose from "mongoose";
+import UserSchema from "./schema/userSchema.js";
 
-require('dotenv').config();
-import { MongoClient, ServerApiVersion } from 'mongodb';
-const uri = "mongodb+srv://oc2ulztsk:" + String(process.env.MONGO_PASS) +"@thesis0.qy0efsu.mongodb.net/?retryWrites=true&w=majority";
+dotenv.config();
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
+const server = String(process.env.DB_PORT);
+const databaseName = String(process.env.DB_NAME);
+
+console.log(server + " " + databaseName);
+/*
+mongoose.connection.on("open", function(ref) {
+    console.log("Connected to mongo server.");
 });
 
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
-}
-run().catch(console.dir);
+mongoose.connection.on("error", function(err) {
+    console.log("Could not connect to mongo server!");
+    return console.log(err);
+});
+*/
+const userMongoModel = mongoose.model("User", UserSchema, "Users");
+mongoose
+    .connect(`mongodb://${server}/${databaseName}`)
+    .then(() => {
+        console.log('MongoDB connected');
+        //console.log(conn.connection.collections)
+        
+        
+    })
+    .catch(err => {
+        console.log('Failed to connect to MongoDB', err);
+    });
+
+    userMongoModel.insertMany([
+        {
+            _id:"0000000000000001",
+            username: "Deleted User",
+            password: "null",
+            email: "null",
+            settings: ""
+        }
+    ])
