@@ -55,34 +55,41 @@ class Authentication {
         }
     }
 
-    static async checkToken(token : string, userID : string) {
-        const result = await this.verifyTokenJose(token);
-        if (undefined !== result.error) {
-            return {
-                "eval": false,
-                "error": result.error
+    static async checkJWTpayload(payload: jose.JWTPayload, userID: string) {
+        return payload["id"] === userID;
+    }
+
+    static async checkData(tokenType: string, token : string, userID : string) {
+        switch (tokenType) {
+            case "jwt": {
+                const payload = await this.verifyTokenJose(token);
+                if (undefined === payload["error"]) {
+                    return this.checkJWTpayload(payload, userID);
+                }
+                return false
             }
-        }
-        if (userID === result.payload.uid) {
-            return {
-                "eval": true,
-            }
-        }
-        return {
-            "eval": false,
-            "error": "invalid token"
+            case "oauth":
+                return false;
+            case "oauth2":
+                return false;
+            default:
+                return false;
         }
     }
 }
 
 /*
-Authentication.createToken({a: "b"}).then(async (result) => {
+Authentication.createTokenJose({a: "b"}).then(async (result) => {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     console.log(result);
 await sleep(1000);
-    Authentication.verifyToken(result).then((token) => {
-        console.log(token);
+    Authentication.verifyTokenJose(result).then((token) => {
+        if (undefined !== token.payload) {
+            console.log(token.payload.a);
+        }
+        
     })
 });
 */
+
 export default Authentication;

@@ -5,9 +5,8 @@ const GroupSchema = new mongoose.Schema({
     name: { type: String , required: true, index: "text"},
     type: { type: String, required: true},
     private: { type: Boolean, default: false },
+    invite: {type: String, index: { type: "hashed", sparse: true, unique: true }},
     setting: { type: String }
 });
-
-GroupSchema.indexes()
 
 export default GroupSchema;

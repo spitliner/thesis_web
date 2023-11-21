@@ -11,7 +11,8 @@ const RoleSchema = new mongoose.Schema({
         required: true
     },
     role: { type: String, required: true },
-    nickname: { type: String, index: { type: "hashed", sparse: true } }
+    nickname: { type: String, required: true ,index: { type: "hashed", sparse: true } },
+    allowChannel: {type: String, required: true}
 });
 
 export default RoleSchema;

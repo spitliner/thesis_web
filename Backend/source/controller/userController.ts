@@ -1,3 +1,4 @@
+import RoleModel from "../database/model/roleModel.js";
 import UserModel from "../database/model/userModel.js";
 import Authentication from "./authentication.js";
 
@@ -40,7 +41,7 @@ class UserController {
     }
 
     static async findUser(nickname: string, groupID: string) {
-        
+        return RoleModel.searchByNickname(nickname, groupID);
     }
 }
 

@@ -14,9 +14,16 @@ class RoleModel {
     }
 
     static async getGroupUser(groupID: string) {
-        return RoleMongoModel.find({
+        const result = await RoleMongoModel.find({
             _id: {
                 groupID: groupID
+            }
+        });
+        return result.map((doc) => {
+            return {
+                "id": doc._id.userID, 
+                "nickname": doc.nickname,
+                "role": doc.role
             }
         });
     }
@@ -31,7 +38,21 @@ class RoleModel {
     }
 
     static async searchByNickname(nickname: string, groupID: string) {
-        
+        const result = await RoleMongoModel.find({
+            _id: {
+                groupID: groupID
+            },
+            nickname: {
+                "$regex": nickname,
+                "$option": 'i'
+            }
+        });
+        return result.map((doc) => {
+            return {
+                "id": doc._id.userID,
+                "nickname": doc.nickname
+            }
+        });
     }
 }
 

@@ -6,7 +6,7 @@ import MessageSchema from "../schema/messageSchema.js";
 const MessageMongoModel = mongoose.model("Message", MessageSchema, "Messages");
 
 class MessageModel {
-    static async getMessages(channelID: string) {
+    static async getAllMessages(channelID: string) {
         return MessageMongoModel.find({
             _id: {
                 channelID: channelID
@@ -14,18 +14,36 @@ class MessageModel {
         })
     }
 
-    static async getSingleMessage(messageID: number, channelID: string) {
+    static async getMessages(channelID: string, isMod?: boolean) {
+        if (undefined === isMod || false === isMod) {
+            return MessageMongoModel.find({
+                _id: {
+                    channelID: channelID
+                },
+                modAction: {"$not": "hide"}
+            })
+        }
+        return MessageMongoModel.find({
+            _id: {
+                channelID: channelID
+            },
+            modAction: "hide"
+        });
+    }
+
+    static async getSingleMessage(messageID: string, channelID: string) {
         return MessageMongoModel.findById({
             id: messageID,
             channelID: channelID
-        })
+        });
     }
 
     static async addMessage(userID: string, channelID: string, type: string, content: string) {
         try {
+            const messageID = Snowflake.generate();
             const result = await MessageMongoModel.insertMany([{
                 _id: {
-                    id: Snowflake.generate(),
+                    id: messageID,
                     channelID: channelID
                 },
                 createAt: new Date(),
@@ -35,14 +53,14 @@ class MessageModel {
                 content: content
             }]);
             console.log(result);
-            return true;
+            return messageID;
         } catch (error) {
             console.log(error);
-            return false;
+            return "0000";
         }
     }
 
-    static async editMessage(messageID: number, channelID: string, editedContent: string) {
+    static async editMessage(messageID: string, channelID: string, editedContent: string) {
         try {
             const oldMessage = await MessageModel.getSingleMessage(messageID, channelID);
             if ("text" === oldMessage?.type) {
@@ -162,14 +180,14 @@ class MessageModel {
         }
     }
 
-    static async searchInMessage(searchRegex: string, searchOption: string,channels: [string]) {
-        const result = await MessageMongoModel.find({
+    static async searchInMessage(searchRegex: string, searchOption: string, channels: [string]) {
+        return MessageMongoModel.find({
             _id: {
                 channelID: channels
             },
             type: "text",
-            content: { $regex: searchRegex, $options: searchOption }
-        })
+            content: { "$regex": searchRegex, "$options": searchOption }
+        });
     }
 }
 

@@ -16,7 +16,7 @@ const defaultSettings = {
 
 class UserModel {
     static async searchUser(userEmail: string) {
-        return UserMongoModel.find({email: userEmail});
+        return UserMongoModel.findOne({email: userEmail});
     }
 
     static async getUser(userID: string) {
@@ -35,6 +35,21 @@ class UserModel {
             email: userEmail
         })
         return result;
+    }
+
+    static async changeEmail(userID: string, newEmail: string) {
+        try {
+            const result = await UserMongoModel.updateOne({
+                _id: userID
+            }, {
+                email: newEmail
+            })
+            console.log(result);
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
     }
 
     static async setSetting(userID: string, newSetting: {[key: string] : unknown}) {
@@ -61,6 +76,19 @@ class UserModel {
                 email: email,
                 settings: String(defaultSettings)
             }]);
+            console.log(result);
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    static async deleteUser(userID: string) {
+        try {
+            const result = await UserMongoModel.deleteOne({
+                _id: userID
+            });
             console.log(result);
             return true;
         } catch (error) {

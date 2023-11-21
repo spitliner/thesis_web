@@ -69,6 +69,21 @@ class ChannelModel {
             return false;
         }
     }
+
+    static async changeChannelName(channelID: string, newName: string) {
+        try {
+            const result = await ChannelMongoModel.updateOne({
+                _id: channelID
+            }, {
+                name: newName
+            })
+            console.log(result);
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
 }
 
 export default ChannelModel;

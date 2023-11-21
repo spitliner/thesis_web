@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const MessageIDSchema = new mongoose.Schema({
-    id: { type: "Number", required: true },
+    id: { type: String, required: true },
     channelID: { type: String, required: true },
 });
 
@@ -11,6 +11,7 @@ const MessageSchema = new mongoose.Schema({
     createAt: {type: Date, required: true},
     lastEdited: {type: Date},
     type: {type: String, required: true},
+    reply: {type: String},
     content: {type: String, required: true, index: "text"},
     modAction: {type: String, required: true}
 });

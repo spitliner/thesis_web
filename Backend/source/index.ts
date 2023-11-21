@@ -10,6 +10,7 @@ import * as socketIO from 'socket.io';
 
 import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from './socket/socketInterface.js';
 import UserModel from './database/model/userModel.js';
+import testDB from './test/testDB.js';
 
 const server = String(process.env.DB_PORT);
 const databaseName = String(process.env.DB_NAME);
@@ -42,10 +43,6 @@ const socket = new socketIO.Server<ClientToServerEvents, ServerToClientEvents, I
 
 const uWebSocketApp = uWebSockets.App();
 socket.attachApp(uWebSocketApp);
-
-UserModel.getUser("00000000000").then(result => {
-    console.log(result);
-})
 
 /*
 socket.on("connection", (socket) => {

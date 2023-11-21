@@ -50,7 +50,6 @@ class GroupModel {
             return false;
         }
     }
-
 }
 
 export default GroupModel;

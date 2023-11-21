@@ -11,7 +11,8 @@ const UserSchema = new mongoose.Schema({
     password: { type: String },
     oauth: { type: oathSchema },
     email: { type: String, index: { type: "hashed", unique: true, sparse: true } },
-    settings: { type: String, equired: true }
+    settings: { type: String, equired: true },
+    lastOnline: {type: Date}
 });
 
 export default UserSchema;
