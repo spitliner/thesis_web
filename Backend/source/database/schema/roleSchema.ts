@@ -12,7 +12,7 @@ const RoleSchema = new mongoose.Schema({
     },
     role: { type: String, required: true },
     nickname: { type: String, required: true ,index: { type: "hashed", sparse: true } },
-    allowChannel: {type: String, required: true}
+    allowChannel: {type: [ String ], required: true}
 });
 
 export default RoleSchema;

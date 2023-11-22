@@ -10,7 +10,7 @@ class RoleModel {
             _id: {
                 userID: userID
             }
-        });
+        }).select("-__v");
     }
 
     static async getGroupUser(groupID: string) {
@@ -18,14 +18,8 @@ class RoleModel {
             _id: {
                 groupID: groupID
             }
-        });
-        return result.map((doc) => {
-            return {
-                "id": doc._id.userID, 
-                "nickname": doc.nickname,
-                "role": doc.role
-            }
-        });
+        }).select("_id role, nickname");
+        return result;
     }
 
     static async isJoinGroup(userID: string, groupID: string) {
@@ -37,22 +31,25 @@ class RoleModel {
         })
     }
 
-    static async searchByNickname(nickname: string, groupID: string) {
-        const result = await RoleMongoModel.find({
-            _id: {
-                groupID: groupID
-            },
-            nickname: {
-                "$regex": nickname,
-                "$option": 'i'
-            }
-        });
-        return result.map((doc) => {
-            return {
-                "id": doc._id.userID,
-                "nickname": doc.nickname
-            }
-        });
+    static async changeNickname(userID: string, groupID: string, newNickname: string) {
+        try {
+            const result = await RoleMongoModel.findOneAndUpdate(
+                {
+                    _id: {
+                        userID: userID,
+                        groupID: groupID
+                    }
+                }, {
+                    nickname: newNickname
+                }, {
+                    "new": true
+                });
+            console.log(result);
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
     }
 }
 

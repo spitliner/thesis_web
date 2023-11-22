@@ -1,17 +1,9 @@
-import cors from "cors";
-import http from 'http';
-import express from "express";
 import * as uWebSockets from 'uWebSockets.js';
 import * as socketIO from 'socket.io';
 
 import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from "./socketInterface.js";
+import http_server from '../webServer/initServer.js';
 
-const express_server = express();
-express_server.use(cors());
-express_server.use(express.json());
-express_server.use(express.urlencoded({ extended: true }));
-
-const http_server = http.createServer(express_server);
 
 const socket = new socketIO.Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(http_server, {
     addTrailingSlash: false,

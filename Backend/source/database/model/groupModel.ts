@@ -10,7 +10,7 @@ const uidGen = customAlphabet(alphabet, 12);
 
 class GroupModel {
     static async getGroup(groupID: string) {
-        return GroupMongoModel.findById(groupID);
+        return GroupMongoModel.findById(groupID).select("-__v");
     }
 
     static async findGroup(groupName: string) {
@@ -19,7 +19,7 @@ class GroupModel {
                 $search: groupName
             },
             private: false
-        })
+        }).select("-__v");
     }
 
     static async createGroup(groupName : string, isPrivate: boolean) {
@@ -31,7 +31,7 @@ class GroupModel {
                 private: isPrivate
             }]);
             console.log(result);
-            return groupID;
+            return result[0];
         } catch (error) {
             console.log(error);
             return "0000";
@@ -43,6 +43,42 @@ class GroupModel {
             const result = await GroupMongoModel.deleteOne({
                 _id: groupID
             });
+            console.log(result);
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    static async changeSearchAble(groupID: string, newSetting : boolean) {
+        try {
+            const result = await GroupMongoModel.findOneAndUpdate(
+                {
+                    _id: groupID
+                }, {
+                    private: newSetting
+                }, {
+                    "new": true
+                }).select("-__v");
+            console.log(result);
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    static async changeSettings(groupID: string, newSetting : boolean) {
+        try {
+            const result = await GroupMongoModel.findOneAndUpdate(
+                {
+                    _id: groupID
+                }, {
+                    settings: newSetting
+                }, {
+                    "new": true
+                }).select("-__v");
             console.log(result);
             return true;
         } catch (error) {

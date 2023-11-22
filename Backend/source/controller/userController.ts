@@ -43,6 +43,10 @@ class UserController {
     static async findUser(nickname: string, groupID: string) {
         return RoleModel.searchByNickname(nickname, groupID);
     }
+
+    static async getJoinedGroup(userID: string) {
+        return RoleModel.getGroupUser(userID);
+    }
 }
 
 export default UserController

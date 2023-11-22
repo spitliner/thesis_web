@@ -11,7 +11,7 @@ class MessageModel {
             _id: {
                 channelID: channelID
             },
-        })
+        }).select('-__v');
     }
 
     static async getMessages(channelID: string, isMod?: boolean) {
@@ -21,21 +21,21 @@ class MessageModel {
                     channelID: channelID
                 },
                 modAction: {"$not": "hide"}
-            })
+            }).select('-__v');
         }
         return MessageMongoModel.find({
             _id: {
                 channelID: channelID
             },
             modAction: "hide"
-        });
+        }).select('-__v');
     }
 
     static async getSingleMessage(messageID: string, channelID: string) {
         return MessageMongoModel.findById({
             id: messageID,
             channelID: channelID
-        });
+        }).select('-__v');
     }
 
     static async addMessage(userID: string, channelID: string, type: string, content: string) {
@@ -53,7 +53,7 @@ class MessageModel {
                 content: content
             }]);
             console.log(result);
-            return messageID;
+            return result[0];
         } catch (error) {
             console.log(error);
             return "0000";
@@ -73,15 +73,17 @@ class MessageModel {
                     }, {
                         lastEdited: new Date(),
                         content: editedContent
-                    })
+                    }, {
+                        "new": true
+                    }).select('-__v');
                     console.log(result);
                 }
                 return true;
             }
-            return false;
+            return undefined;
         } catch (error) {
             console.log(error);
-            return false;
+            return undefined;
         }
     }
 
@@ -94,7 +96,7 @@ class MessageModel {
                 },
             }, {
                 modAction: action
-            });
+            }).select('-__v');
             console.log(result);
             return true;
         } catch (error) {

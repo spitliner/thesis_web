@@ -18,11 +18,22 @@ function searchToRegex(searchWord: string, option?: 'i' | 'm' | 'x' | 's') {
 
 class MessageController {
     static async getMessageInChannel(channelID: string) {
-        return MessageModel.getVisibleMessages(channelID);
+        return MessageModel.getMessages(channelID);
     }
 
+    static async getHideMessage(channelID: string) {
+        return MessageModel.getMessages(channelID, true);
+    }
     static async getReply(channelID: string, messageID: string) {
         return MessageModel.getSingleMessage(messageID, channelID);
+    }
+
+    static async addMessage(userID: string, channelID: string, messageType: string, content: string) {
+        return MessageModel.addMessage(userID, channelID, messageType, content);
+    }
+
+    static async editMessage(userID: string, channelID: string, content: string) {
+        
     }
 }
 

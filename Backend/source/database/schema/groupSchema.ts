@@ -6,7 +6,7 @@ const GroupSchema = new mongoose.Schema({
     type: { type: String, required: true},
     private: { type: Boolean, default: false },
     invite: {type: String, index: { type: "hashed", sparse: true, unique: true }},
-    setting: { type: String }
+    settings: { type: String }
 });
 
 export default GroupSchema;

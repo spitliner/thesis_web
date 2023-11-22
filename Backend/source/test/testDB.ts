@@ -9,16 +9,27 @@ const testModel = mongoose.model("test", testSchema);
 
 class testDB {
     static async addData(id: string, value: string) {
-        (await testModel.insertMany([{
+        return testModel.insertMany([{
             _id: id,
             value: value
-        }]))
+        }], );
     }
 
     static async getData(value: string) {
         return testModel.find({
             value: value
         });
+    }
+
+    static async updateData(id:string, value: string) {
+        return testModel.findOneAndUpdate(
+            {
+                _id: id
+            }, {
+                value: value
+            }, {
+                "new": true
+            })
     }
 }
 

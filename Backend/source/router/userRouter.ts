@@ -23,6 +23,15 @@ UserRouter.post("/login", async (request, response) => {
     }
 });
 
+UserRouter.get("/self/", async (request, response) => {
+    try {
+        
+    } catch (error) {
+        console.log(error);
+        return response.status(500).json({"error": "unexpected server error"});
+    }
+});
+
 UserRouter.get("/self/settings", async (request, response) => {
     try {
         //return response.status(200).json(await UserController.getUser(""));
@@ -33,7 +42,7 @@ UserRouter.get("/self/settings", async (request, response) => {
         return response.status(200).json(result);
     } catch (error) {
         console.log(error);
-        return response.status(500).json({"error": "server error"});
+        return response.status(500).json({"error": "unexpected server error"});
     }
 });
 
@@ -42,10 +51,10 @@ UserRouter.post("/self/settings", async (request, response) => {
         if (undefined === request.body.settings) {
             return response.status(400)
         }
-        const result = await UserController.setSetting()
+        const result = await UserController.setSetting(request.cookies['uid'], request.body.settings);
     } catch (error) {
         console.log(error);
-        return response.status(500).json({"error": "server error"})
+        return response.status(500).json({"error": "sunexpected server error"})
     }
 });
 
