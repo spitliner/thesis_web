@@ -33,7 +33,7 @@ class RoleModel {
 
     static async changeNickname(userID: string, groupID: string, newNickname: string) {
         try {
-            const result = await RoleMongoModel.findOneAndUpdate(
+            const result = await RoleMongoModel.updateOne(
                 {
                     _id: {
                         userID: userID,
@@ -41,6 +41,48 @@ class RoleModel {
                     }
                 }, {
                     nickname: newNickname
+                }, {
+                    "new": true
+                });
+            console.log(result);
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    static async changeRole(userID: string, groupID: string, newRole: string) {
+        try {
+            const result = await RoleMongoModel.updateOne(
+                {
+                    _id: {
+                        userID: userID,
+                        groupID: groupID
+                    }
+                }, {
+                    role: newRole
+                }, {
+                    "new": true
+                });
+            console.log(result);
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    static async changeChannelAllow(userID: string, groupID: string, newAllow: string[]) {
+        try {
+            const result = await RoleMongoModel.updateOne(
+                {
+                    _id: {
+                        userID: userID,
+                        groupID: groupID
+                    }
+                }, {
+                    allowChannel: newAllow
                 }, {
                     "new": true
                 });

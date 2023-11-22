@@ -60,25 +60,26 @@ class MessageModel {
         }
     }
 
-    static async editMessage(messageID: string, channelID: string, editedContent: string) {
+    static async editMessage(messageID: string, channelID: string, userID: string, editedContent: string) {
         try {
             const oldMessage = await MessageModel.getSingleMessage(messageID, channelID);
             if ("text" === oldMessage?.type) {
                 if (editedContent !== oldMessage.content) {
-                    const result = await MessageMongoModel.updateOne({
+                    const result = await MessageMongoModel.findOneAndUpdate({
                         _id: {
                             messageID: messageID,
                             channelID: channelID
-                        }
+                        },
+                        userID: userID
                     }, {
                         lastEdited: new Date(),
                         content: editedContent
                     }, {
                         "new": true
                     }).select('-__v');
-                    console.log(result);
+                    return result;
                 }
-                return true;
+                return undefined;
             }
             return undefined;
         } catch (error) {
@@ -89,7 +90,7 @@ class MessageModel {
 
     static async moderateMessage(messageID: string, channelID: string, action: string) {
         try {
-            const result = await MessageMongoModel.updateOne({
+            const result = await MessageMongoModel.findOneAndUpdate({
                 _id: {
                     id: messageID,
                     channelID: channelID

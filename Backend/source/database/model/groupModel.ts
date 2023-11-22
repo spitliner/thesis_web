@@ -53,14 +53,14 @@ class GroupModel {
 
     static async changeSearchAble(groupID: string, newSetting : boolean) {
         try {
-            const result = await GroupMongoModel.findOneAndUpdate(
+            const result = await GroupMongoModel.updateOne(
                 {
                     _id: groupID
                 }, {
                     private: newSetting
                 }, {
                     "new": true
-                }).select("-__v");
+                });
             console.log(result);
             return true;
         } catch (error) {
@@ -71,14 +71,14 @@ class GroupModel {
 
     static async changeSettings(groupID: string, newSetting : boolean) {
         try {
-            const result = await GroupMongoModel.findOneAndUpdate(
+            const result = await GroupMongoModel.updateOne(
                 {
                     _id: groupID
                 }, {
                     settings: newSetting
                 }, {
                     "new": true
-                }).select("-__v");
+                });
             console.log(result);
             return true;
         } catch (error) {
