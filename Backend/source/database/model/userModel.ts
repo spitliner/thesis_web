@@ -16,11 +16,15 @@ const defaultSettings = {
 
 class UserModel {
     static async searchUser(userEmail: string) {
-        return UserMongoModel.findOne({email: userEmail});
+        return UserMongoModel.findOne({email: userEmail}).select("-__v").lean().exec();
     }
 
     static async getUser(userID: string) {
-        return UserMongoModel.findById(userID);
+        return UserMongoModel.findById(userID).select("-__v").lean().exec();
+    }
+
+    static async getUserSafe(userID: string) {
+        return UserMongoModel.findById(userID).select("-__v -password -oauth").lean().exec();
     }
 
     static async checkID(userID: string) {
@@ -43,27 +47,54 @@ class UserModel {
                 _id: userID
             }, {
                 email: newEmail
-            })
-            console.log(result);
-            return true;
+            }).exec();
+            return {
+                "docFound": 1 === result.matchedCount,
+                "docModified": 1 === result.modifiedCount
+            }
         } catch (error) {
             console.log(error);
-            return false;
+            return {
+                "error": "database error"
+            };
         }
     }
 
-    static async setSetting(userID: string, newSetting: {[key: string] : unknown}) {
+    static async changePassword(userID: string, newHashedPassword: string) {
+        try {
+            const result = await UserMongoModel.updateOne({
+                _id: userID
+            }, {
+                password: newHashedPassword
+            }).exec();
+            return {
+                "docFound": 1 === result.matchedCount,
+                "docModified": 1 === result.modifiedCount
+            }
+        } catch (error) {
+            console.log(error);
+            return {
+                "error": "database error"
+            };
+        }
+    }
+
+    static async changeSettings(userID: string, newSetting: {[key: string] : unknown}) {
         try {
             const result = await UserMongoModel.updateOne({
                 _id: userID
             }, {
                 settings: String(newSetting)
-            })
-            console.log(result);
-            return true;
+            }).exec();
+            return {
+                "docFound": 1 === result.matchedCount,
+                "docModified": 1 === result.modifiedCount
+            }
         } catch (error) {
             console.log(error);
-            return false;
+            return {
+                "error": "database error"
+            };
         }
     }
 
@@ -88,7 +119,7 @@ class UserModel {
         try {
             const result = await UserMongoModel.deleteOne({
                 _id: userID
-            });
+            }).lean().exec();
             console.log(result);
             return true;
         } catch (error) {

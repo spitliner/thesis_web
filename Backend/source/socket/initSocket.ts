@@ -16,8 +16,7 @@ const uWebSocketApp = uWebSockets.App();
 socket.attachApp(uWebSocketApp);
 
 socket.engine.on("initial_headers", (headers, request) => {
-    headers["test"] = "123";
-    headers["set-cookie"] = "mycookie=456";
+
 });
 
 socket.engine.on("connection_error", (error) => {

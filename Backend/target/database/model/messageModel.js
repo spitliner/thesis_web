@@ -1,66 +1,60 @@
 import mongoose from "mongoose";
 import { Snowflake } from "@theinternetfolks/snowflake";
-
 import MessageSchema from "../schema/messageSchema.js";
-
 const MessageMongoModel = mongoose.model("Message", MessageSchema, "Messages");
-
 class MessageModel {
-    static async getAllMessages(channelID: string) {
+    static async getAllMessages(channelID) {
         return MessageMongoModel.find({
             _id: {
                 channelID: channelID
             },
-        }).select('-__v').lean();
+        }).select('-__v');
     }
-
-    static async getMessages(channelID: string, isMod?: boolean) {
+    static async getMessages(channelID, isMod) {
         if (undefined === isMod || false === isMod) {
             return MessageMongoModel.find({
                 _id: {
                     channelID: channelID
                 },
-                modAction: {"$not": "hide"}
-            }).select('-__v').lean();
+                modAction: { "$not": "hide" }
+            }).select('-__v');
         }
         return MessageMongoModel.find({
             _id: {
                 channelID: channelID
             },
             modAction: "hide"
-        }).select('-__v').lean();
+        }).select('-__v');
     }
-
-    static async getSingleMessage(messageID: string, channelID: string) {
+    static async getSingleMessage(messageID, channelID) {
         return MessageMongoModel.findById({
             id: messageID,
             channelID: channelID
-        }).select('-__v').lean();
+        }).select('-__v');
     }
-
-    static async addMessage(userID: string, channelID: string, type: string, content: string) {
+    static async addMessage(userID, channelID, type, content) {
         try {
             const messageID = Snowflake.generate();
             const result = await MessageMongoModel.insertMany([{
-                _id: {
-                    id: messageID,
-                    channelID: channelID
-                },
-                createAt: new Date(),
-                modAction: "",
-                userID: userID,
-                type: type,
-                content: content
-            }]);
+                    _id: {
+                        id: messageID,
+                        channelID: channelID
+                    },
+                    createAt: new Date(),
+                    modAction: "",
+                    userID: userID,
+                    type: type,
+                    content: content
+                }]);
             console.log(result);
             return result[0];
-        } catch (error) {
+        }
+        catch (error) {
             console.log(error);
             return "0000";
         }
     }
-
-    static async editMessage(messageID: string, channelID: string, userID: string, editedContent: string) {
+    static async editMessage(messageID, channelID, userID, editedContent) {
         try {
             const oldMessage = await MessageModel.getSingleMessage(messageID, channelID);
             if ("text" === oldMessage?.type) {
@@ -82,13 +76,13 @@ class MessageModel {
                 return undefined;
             }
             return undefined;
-        } catch (error) {
+        }
+        catch (error) {
             console.log(error);
             return undefined;
         }
     }
-
-    static async moderateMessage(messageID: string, channelID: string, action: string) {
+    static async moderateMessage(messageID, channelID, action) {
         try {
             const result = await MessageMongoModel.findOneAndUpdate({
                 _id: {
@@ -100,57 +94,57 @@ class MessageModel {
             }).select('-__v');
             console.log(result);
             return true;
-        } catch (error) {
+        }
+        catch (error) {
             console.log(error);
             return false;
         }
     }
-
-    static async deleteMessage(channelID: string, messageID: string) {
+    static async deleteMessage(channelID, messageID) {
         try {
             const result = await MessageMongoModel.deleteOne({
                 _id: {
                     id: messageID,
                     channelID: channelID
                 }
-            })
-            console.log(result)
+            });
+            console.log(result);
             return true;
-        } catch (error) {
+        }
+        catch (error) {
             console.log(error);
             return false;
         }
     }
-
-    static async deleteChannelMessages(groupID: string, channelID: string) {
+    static async deleteChannelMessages(groupID, channelID) {
         try {
             const result = await MessageMongoModel.deleteMany({
                 _id: {
                     channelID: channelID
                 }
-            })
-            console.log(result)
+            });
+            console.log(result);
             return true;
-        } catch (error) {
+        }
+        catch (error) {
             console.log(error);
             return false;
         }
     }
-
-    static async deleteUserMessage(userID: string) {
+    static async deleteUserMessage(userID) {
         try {
             const result = await MessageMongoModel.deleteMany({
                 userID: userID
-            })
-            console.log(result)
+            });
+            console.log(result);
             return true;
-        } catch (error) {
+        }
+        catch (error) {
             console.log(error);
             return false;
         }
     }
-
-    static async anonUserMessage(userID: string) {
+    static async anonUserMessage(userID) {
         try {
             const result = await MessageMongoModel.updateMany({
                 userID: userID
@@ -159,13 +153,13 @@ class MessageModel {
             });
             console.log(result);
             return true;
-        } catch (error) {
+        }
+        catch (error) {
             console.log(error);
             return false;
         }
     }
-
-    static async anonUserMessageChannel(userID: string, channelID: string) {
+    static async anonUserMessageChannel(userID, channelID) {
         try {
             const result = await MessageMongoModel.updateMany({
                 _id: {
@@ -177,13 +171,13 @@ class MessageModel {
             });
             console.log(result);
             return true;
-        } catch (error) {
+        }
+        catch (error) {
             console.log(error);
             return false;
         }
     }
-
-    static async searchInMessage(searchRegex: string, searchOption: string, channels: [string]) {
+    static async searchInMessage(searchRegex, searchOption, channels) {
         return MessageMongoModel.find({
             _id: {
                 channelID: channels
@@ -193,5 +187,4 @@ class MessageModel {
         });
     }
 }
-
 export default MessageModel;

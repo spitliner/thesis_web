@@ -10,7 +10,7 @@ class RoleModel {
             _id: {
                 userID: userID
             }
-        }).select("-__v");
+        }).select("-__v").lean();
     }
 
     static async getGroupUser(groupID: string) {
@@ -18,7 +18,7 @@ class RoleModel {
             _id: {
                 groupID: groupID
             }
-        }).select("_id role, nickname");
+        }).select("_id role nickname").lean();
         return result;
     }
 
@@ -41,8 +41,6 @@ class RoleModel {
                     }
                 }, {
                     nickname: newNickname
-                }, {
-                    "new": true
                 });
             console.log(result);
             return true;
@@ -62,8 +60,6 @@ class RoleModel {
                     }
                 }, {
                     role: newRole
-                }, {
-                    "new": true
                 });
             console.log(result);
             return true;
@@ -83,8 +79,6 @@ class RoleModel {
                     }
                 }, {
                     allowChannel: newAllow
-                }, {
-                    "new": true
                 });
             console.log(result);
             return true;

@@ -12,13 +12,13 @@ class testDB {
         return testModel.insertMany([{
             _id: id,
             value: value
-        }], );
+        }]);
     }
 
     static async getData(value: string) {
         return testModel.find({
             value: value
-        });
+        }).lean().select("-__v").exec();
     }
 
     static async updateData(id:string, value: string) {
@@ -29,7 +29,7 @@ class testDB {
                 value: value
             }, {
                 "new": true
-            })
+            }).select("-__v");
     }
 }
 

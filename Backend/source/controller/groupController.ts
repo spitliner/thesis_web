@@ -7,7 +7,7 @@ class GroupController {
     }
 
     static async getJoinedUser(groupID: string) {
-
+        return RoleModel.getGroupUser(groupID);
     }
 
     static async getChannels(userID: string, groupID: string) {
