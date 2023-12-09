@@ -17,9 +17,19 @@ class UserController {
         }
     }
 
-    static async setSetting(userID: string, newVal : {[key: string] : unknown}) {
-        const result = await UserModel.changeSettings(userID, newVal);
-        return result;
+    static async setSetting(userID: string, newSettings : {[key: string] : unknown}) {
+        try {
+            const usr = await UserModel.getUser(userID);
+            if (null === usr) {
+                return false;
+            }
+            usr.settings = JSON.stringify(newSettings);
+            await usr.save();
+            return true;
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
     }
 
     static async login(email: string, password : string) {
@@ -41,7 +51,11 @@ class UserController {
     }
 
     static async getJoinedGroup(userID: string) {
-        return RoleModel.getGroupUser(userID);
+        return RoleModel.getUserGroup(userID);
+    }
+
+    static async getUserRoleInGroup(userID: string, groupID: string) {
+        return RoleModel.getUserRole(userID, groupID);
     }
 }
 

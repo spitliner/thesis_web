@@ -21,7 +21,7 @@ class MessageController {
         return MessageModel.getMessages(channelID);
     }
 
-    static async getHideMessage(channelID: string) {
+    static async getHidenMessage(channelID: string) {
         return MessageModel.getMessages(channelID, true);
     }
     static async getReply(channelID: string, messageID: string) {
@@ -32,8 +32,12 @@ class MessageController {
         return MessageModel.addMessage(userID, channelID, messageType, content);
     }
 
-    static async editMessage(userID: string, channelID: string, content: string) {
-        
+    static async editMessage(messageID: string, userID: string, channelID: string, content: string) {
+        return MessageModel.editMessage(messageID, channelID, userID, content);
+    }
+
+    static async moderateMessage(messageID: string, channelID: string, action: string) {
+        return MessageModel.moderateMessage(messageID, channelID, action);
     }
 }
 

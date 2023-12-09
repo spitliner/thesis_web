@@ -6,13 +6,14 @@ const openIDschema = new mongoose.Schema({
 });
 
 const UserSchema = new mongoose.Schema({
-    _id: { type: String, required: true },
+    id: { type: String, required: true, index: { type: "hashed", unique: true } },
     username: { type: String, required: true, index: "text" },
     password: { type: String },
     openIDAuth: { type: openIDschema },
-    email: { type: String, index: { type: "hashed", unique: true, sparse: true } },
+    email: { type: String, required: true, index: { type: "hashed", unique: true } },
     settings: { type: String, required: true },
-    lastOnline: {type: Date}
+    lastOnline: {type: Date},
+    friends: {type: String}
 });
 
 export default UserSchema;

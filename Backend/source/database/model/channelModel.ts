@@ -10,18 +10,31 @@ const uidGen = customAlphabet(alphabet, 16);
 const ChannelMongoModel = mongoose.model("Channel", ChannelSchema, "Channels");
 
 class ChannelModel {
+    static async getChannel(channelID: string) {
+        return ChannelMongoModel.findOne({
+            id: channelID,
+
+        }, "-__v -_id").exec();
+    }
+
+    static async getChannelData(channelID: string) {
+        return ChannelMongoModel.findOne({
+            id: channelID,
+
+        }, "-__v -_id").lean().exec();
+    }
+
     static async createChannel(groupID: string, channelName: string) {
         try {
-            const channelID = uidGen();
             const result = await ChannelMongoModel.insertMany([
                 {
-                    _id: channelID,
+                    id: uidGen(),
                     groupID: groupID,
                     name: channelName
                 }
             ]);
-            console.log(result);
-            return channelID;
+            //console.log(result);
+            return result[0];
         } catch (error) {
             console.log(error);
             return "0000";
@@ -31,10 +44,10 @@ class ChannelModel {
     static async deleteChannel(groupID: string, channelID: string) {
         try {
             const result = await ChannelMongoModel.deleteOne({
-                _id: channelID,
+                id: channelID,
                 groupID: groupID
-            })
-            console.log(result);
+            }).lean().exec();
+            console.log("Delete " + result.deletedCount + " channel");
             return true;
         } catch (error) {
             console.log(error);
@@ -46,7 +59,7 @@ class ChannelModel {
         try {
             const result = await ChannelMongoModel.deleteMany({
                 groupID: groupID
-            })
+            }).lean().exec();
             console.log(result);
             return true;
         } catch (error) {
@@ -55,33 +68,33 @@ class ChannelModel {
         }
     }
 
-    static async saveChannelSetting(channelID: string, settings: {[key: string]: unknown}) {
+    static async saveChannelSetting(channelID: string, newSettings: {[key: string]: unknown}) {
         try {
-            const result = await ChannelMongoModel.updateOne({
-                _id: channelID
-            }, {
-                settings: String(settings)
-            })
-            console.log(result);
+            const channel = await ChannelModel.getChannel(channelID);
+            if (null === channel) {
+                return false;
+            }
+            channel.settings = JSON.stringify(newSettings);
+            await channel.save();
             return true;
         } catch (error) {
             console.log(error);
-            return false;
+            return null;
         }
     }
 
     static async changeChannelName(channelID: string, newName: string) {
         try {
-            const result = await ChannelMongoModel.updateOne({
-                _id: channelID
-            }, {
-                name: newName
-            })
-            console.log(result);
+            const channel = await ChannelModel.getChannel(channelID);
+            if (null === channel) {
+                return false;
+            }
+            channel.name = newName;
+            await channel.save();
             return true;
         } catch (error) {
             console.log(error);
-            return false;
+            return null;
         }
     }
 }

@@ -16,92 +16,37 @@ const defaultSettings = {
 
 class UserModel {
     static async searchUser(userEmail: string) {
-        return UserMongoModel.findOne({email: userEmail}).select("-__v").lean().exec();
+        return UserMongoModel.findOne({email: userEmail}, "-__v").exec();
     }
 
     static async getUser(userID: string) {
-        return UserMongoModel.findById(userID).select("-__v").lean().exec();
+        return UserMongoModel.findById(userID, "-__v").exec();
     }
 
     static async getUserSafe(userID: string) {
-        return UserMongoModel.findById(userID).select("-__v -password -oauth").lean().exec();
+        return UserMongoModel.findById(userID, "-__v -password -oauth").lean().exec();
     }
 
-    static async checkID(userID: string) {
-        const result = 0 !== await UserMongoModel.countDocuments({
+    static async getUserData(userID: string) {
+        return UserMongoModel.findById(userID, "-__v").lean().exec();
+    }
+
+    static async checkID(userID: string) {  
+        return 0 !== await UserMongoModel.countDocuments({
             _id: userID
-        });
-        return result;
+        }).lean().exec();
     }
 
     static async checkEmail(userEmail: string) {
-        const result = 0 !== await UserMongoModel.countDocuments({
+        return 0 !== await UserMongoModel.countDocuments({
             email: userEmail
-        })
-        return result;
-    }
-
-    static async changeEmail(userID: string, newEmail: string) {
-        try {
-            const result = await UserMongoModel.updateOne({
-                _id: userID
-            }, {
-                email: newEmail
-            }).exec();
-            return {
-                "docFound": 1 === result.matchedCount,
-                "docModified": 1 === result.modifiedCount
-            }
-        } catch (error) {
-            console.log(error);
-            return {
-                "error": "database error"
-            };
-        }
-    }
-
-    static async changePassword(userID: string, newHashedPassword: string) {
-        try {
-            const result = await UserMongoModel.updateOne({
-                _id: userID
-            }, {
-                password: newHashedPassword
-            }).exec();
-            return {
-                "docFound": 1 === result.matchedCount,
-                "docModified": 1 === result.modifiedCount
-            }
-        } catch (error) {
-            console.log(error);
-            return {
-                "error": "database error"
-            };
-        }
-    }
-
-    static async changeSettings(userID: string, newSetting: {[key: string] : unknown}) {
-        try {
-            const result = await UserMongoModel.updateOne({
-                _id: userID
-            }, {
-                settings: String(newSetting)
-            }).exec();
-            return {
-                "docFound": 1 === result.matchedCount,
-                "docModified": 1 === result.modifiedCount
-            }
-        } catch (error) {
-            console.log(error);
-            return {
-                "error": "database error"
-            };
-        }
+        }).exec();
     }
 
     static async insertUser(username: string, hashPassword: string, email: string) {
         try {
             const result = await UserMongoModel.insertMany([{
-                _id: uidGen(),
+                id: uidGen(),
                 username: username,
                 password: hashPassword,
                 email: email,
@@ -125,6 +70,85 @@ class UserModel {
         } catch (error) {
             console.log(error);
             return false;
+        }
+    }
+
+    static async changeSetting(userID: string, newSetting: string) {
+        try {
+            const user = await UserModel.getUser(userID);
+            if (null === user) {
+                return false;
+            }
+            user.settings = newSetting;
+            await user.save();
+            return true;
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
+    }
+
+    static async changeEmail(userID: string, newmail: string) {
+        try {
+            const user = await UserModel.getUser(userID);
+            if (null === user) {
+                return false;
+            }
+            user.email = newmail;
+            await user.save();
+            return true;
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
+    }
+
+    static async changePassword(userID: string, newPass: string) {
+        try {
+            const user = await UserModel.getUser(userID);
+            if (null === user) {
+                return false;
+            }
+            user.password = newPass;
+            await user.save();
+            return true;
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
+    }
+
+    static async updateLastOnline(userID: string) {
+        try {
+            const user = await UserModel.getUser(userID);
+            if (null === user) {
+                return false;
+            }
+            user.updateOne({lastOnline: new Date()})
+            return true;
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
+    }
+
+    static async addFriend(userID: string, friendID: string, channelID: string) {
+        try {
+            const user = await UserModel.getUser(userID);
+            if (null === user) {
+                return false;
+            }
+            let friendList : {[key:string] :string} = {};
+            if (undefined !== user.friends) {
+                friendList = JSON.parse(user.friends);
+            }
+            friendList[friendID] = channelID;
+            user.friends = JSON.stringify(friendList);
+            await user.save();
+            return true;
+        } catch (error) {
+            console.log(error);
+            return null;
         }
     }
 }

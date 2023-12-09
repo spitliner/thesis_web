@@ -8,34 +8,39 @@ const MessageMongoModel = mongoose.model("Message", MessageSchema, "Messages");
 class MessageModel {
     static async getAllMessages(channelID: string) {
         return MessageMongoModel.find({
-            _id: {
-                channelID: channelID
-            },
-        }).select('-__v').lean();
+            channelID: channelID,
+        }).select('-__v -_id').lean().exec();
     }
 
-    static async getMessages(channelID: string, isMod?: boolean) {
-        if (undefined === isMod || false === isMod) {
+    static async getMessages(channelID: string, isModFeed?: boolean) {
+        if (undefined === isModFeed || false === isModFeed) {
             return MessageMongoModel.find({
-                _id: {
-                    channelID: channelID
-                },
-                modAction: {"$not": "hide"}
-            }).select('-__v').lean();
+                channelID: channelID,
+                modAction: {
+                    "$not": {
+                        "$regex": "hide"
+                    }
+                }
+            }, "-__v -_id").lean().exec();
         }
         return MessageMongoModel.find({
-            _id: {
-                channelID: channelID
-            },
+            channelID: channelID,
             modAction: "hide"
-        }).select('-__v').lean();
+        }, "-__v -_id").lean().exec();
     }
 
-    static async getSingleMessage(messageID: string, channelID: string) {
+    static async getSingleMessageData(messageID: string, channelID: string) {
         return MessageMongoModel.findById({
             id: messageID,
             channelID: channelID
-        }).select('-__v').lean();
+        }, "-__v -_id").lean().exec();
+    }
+
+    static async getSingleMessage(messageID: string, channelID: string) {
+        return MessageMongoModel.findOne({
+            id: messageID,
+            channelID: channelID
+        }, "-__v -_id").exec();
     }
 
     static async addMessage(userID: string, channelID: string, type: string, content: string) {
@@ -47,93 +52,92 @@ class MessageModel {
                     channelID: channelID
                 },
                 createAt: new Date(),
-                modAction: "",
                 userID: userID,
                 type: type,
                 content: content
             }]);
-            console.log(result);
+            //console.log(result);
             return result[0];
         } catch (error) {
             console.log(error);
-            return "0000";
+            return null;
         }
     }
 
     static async editMessage(messageID: string, channelID: string, userID: string, editedContent: string) {
         try {
             const oldMessage = await MessageModel.getSingleMessage(messageID, channelID);
-            if ("text" === oldMessage?.type) {
-                if (editedContent !== oldMessage.content) {
-                    const result = await MessageMongoModel.findOneAndUpdate({
-                        _id: {
-                            messageID: messageID,
-                            channelID: channelID
-                        },
-                        userID: userID
-                    }, {
-                        lastEdited: new Date(),
-                        content: editedContent
-                    }, {
-                        "new": true
-                    }).select('-__v');
-                    return result;
+            if (null !== oldMessage && userID === oldMessage.userID) {
+                if (oldMessage.content !== editedContent) {
+                    oldMessage.content = editedContent;
+                    oldMessage.lastEdited = new Date();
+                    await oldMessage.save();
                 }
-                return undefined;
+                return true;
             }
-            return undefined;
+            return false;
         } catch (error) {
             console.log(error);
-            return undefined;
+            return false;
         }
     }
 
     static async moderateMessage(messageID: string, channelID: string, action: string) {
         try {
-            const result = await MessageMongoModel.findOneAndUpdate({
-                _id: {
-                    id: messageID,
-                    channelID: channelID
-                },
-            }, {
-                modAction: action
-            }).select('-__v');
-            console.log(result);
-            return true;
+            const oldMessage = await MessageModel.getSingleMessage(messageID, channelID);
+            let result = null;
+            if (null !== oldMessage) {
+                if (oldMessage.modAction !== action) {
+                    oldMessage.modAction = action;
+                    result = await oldMessage.save();
+                }
+                return result === oldMessage;
+            }
+            return false;
         } catch (error) {
             console.log(error);
-            return false;
+            return null;
         }
     }
 
     static async deleteMessage(channelID: string, messageID: string) {
         try {
             const result = await MessageMongoModel.deleteOne({
-                _id: {
-                    id: messageID,
-                    channelID: channelID
-                }
-            })
+                id: messageID,
+                channelID: channelID
+            }).lean().exec();
             console.log(result)
-            return true;
+            return result.acknowledged;
         } catch (error) {
             console.log(error);
-            return false;
+            return null;
         }
     }
 
-    static async deleteChannelMessages(groupID: string, channelID: string) {
+    static async deleteChannelMessages(channelID: string) {
         try {
             const result = await MessageMongoModel.deleteMany({
-                _id: {
-                    channelID: channelID
-                }
-            })
+                channelID: channelID
+            }).lean().exec();
             console.log(result)
-            return true;
+            return result.acknowledged;
         } catch (error) {
             console.log(error);
-            return false;
+            return null;
+        }
+    }
+
+    static async deleteMessagesInChannel(userID: string, channelID: string) {
+        try {
+            const result = await MessageMongoModel.deleteMany({
+                channelID: channelID,
+                userID: userID
+            }).lean().exec();
+            console.log(result)
+            return result.acknowledged;
+        } catch (error) {
+            console.log(error);
+            return null;
         }
     }
 
@@ -156,9 +160,9 @@ class MessageModel {
                 userID: userID
             }, {
                 userID: "0000"
-            });
+            }).lean().exec();
             console.log(result);
-            return true;
+            return result.acknowledged;
         } catch (error) {
             console.log(error);
             return false;
@@ -168,29 +172,42 @@ class MessageModel {
     static async anonUserMessageChannel(userID: string, channelID: string) {
         try {
             const result = await MessageMongoModel.updateMany({
-                _id: {
-                    channelID: channelID
-                },
+                channelID: channelID,
                 userID: userID
             }, {
                 userID: "0000"
-            });
+            }).lean().exec();
             console.log(result);
-            return true;
+            return result.acknowledged;
         } catch (error) {
             console.log(error);
             return false;
         }
     }
 
-    static async searchInMessage(searchRegex: string, searchOption: string, channels: [string]) {
+    static async searchInMessage(searchPhrase: string, searchOption: string, channels: [string]) {
         return MessageMongoModel.find({
-            _id: {
-                channelID: channels
-            },
+            channelID: channels,
             type: "text",
-            content: { "$regex": searchRegex, "$options": searchOption }
-        });
+            $text : {
+                $search: searchPhrase
+            }
+        }).sort({createAt: 1}).lean().exec();
+    }
+
+    static async searchMention(userID: string, searchOption: string, channels: [string]) {
+        return MessageMongoModel.find({
+            channelID: channels,
+            type: "mention",
+            content: userID
+        }).sort({createAt: 1}).lean().exec();
+    }
+
+    static async searchAuthor(userID: string, searchOption: string, channels: [string]) {
+        return MessageMongoModel.find({
+            channelID: channels,
+            userID: userID,
+        }).sort({createAt: 1}).lean().exec();
     }
 }
 

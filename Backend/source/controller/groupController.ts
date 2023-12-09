@@ -11,7 +11,8 @@ class GroupController {
     }
 
     static async getChannels(userID: string, groupID: string) {
-        
+        const visibleChannel = await RoleModel.getUserRole(userID, groupID);
+        return visibleChannel?.allowChannel;
     }
 
     static async generatePesonalInvite(userID: string, groupID: string) {

@@ -2,7 +2,7 @@ import express from 'express';
 
 const ChannelRouter = express.Router();
 
-ChannelRouter.get("", (request, response) => {
+ChannelRouter.get('/', (request, response) => {
     try {
         
     } catch (error) {

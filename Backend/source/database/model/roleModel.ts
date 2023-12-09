@@ -1,91 +1,67 @@
 import mongoose from "mongoose";
 
 import RoleSchema from "../schema/roleSchema.js";
+import UserModel from "./userModel.js";
+import GroupModel from "./groupModel.js";
 
 const RoleMongoModel = mongoose.model("User", RoleSchema, "Users");
 
 class RoleModel {
+    static async getUserRole(userID: string, groupID: string) {
+        return RoleMongoModel.findById({
+            userID: userID,
+            groupID: groupID
+        }, "-__v").exec();
+    }
+
     static async getUserGroup(userID: string) {
         return RoleMongoModel.find({
-            _id: {
-                userID: userID
-            }
-        }).select("-__v").lean();
+            userID: userID
+        }, "-__v").lean().exec();
     }
 
     static async getGroupUser(groupID: string) {
         const result = await RoleMongoModel.find({
-            _id: {
-                groupID: groupID
-            }
-        }).select("_id role nickname").lean();
+            groupID: groupID
+        }).select("-_id -allowChannel").lean().exec();
         return result;
     }
 
     static async isJoinGroup(userID: string, groupID: string) {
         return 0 !== await RoleMongoModel.countDocuments({
-            _id: {
-                userID: userID,
-                groupID: groupID
+            userID: userID,
+            groupID: groupID
+        });
+    }
+
+    static async addUserToGroup(userID: string, groupID: string) {
+        try {
+            const usr = await UserModel.getUserSafe(userID);
+            if (null === usr) {
+                return {
+                    code: 1,
+                    error: "User not found"
+                }
+            } else if (false === await GroupModel.checkGroupID(groupID)) {
+                return {
+                    code: 2,
+                    error: "Group not found"
+                }
             }
-        })
-    }
-
-    static async changeNickname(userID: string, groupID: string, newNickname: string) {
-        try {
-            const result = await RoleMongoModel.updateOne(
-                {
-                    _id: {
-                        userID: userID,
-                        groupID: groupID
-                    }
-                }, {
-                    nickname: newNickname
-                });
-            console.log(result);
-            return true;
+            return RoleMongoModel.insertMany([{
+                userID: userID,
+                groupID: groupID,
+    
+            }])
         } catch (error) {
             console.log(error);
-            return false;
+            return {
+                code: 4,
+                error: "Database error"
+            };
         }
-    }
-
-    static async changeRole(userID: string, groupID: string, newRole: string) {
-        try {
-            const result = await RoleMongoModel.updateOne(
-                {
-                    _id: {
-                        userID: userID,
-                        groupID: groupID
-                    }
-                }, {
-                    role: newRole
-                });
-            console.log(result);
-            return true;
-        } catch (error) {
-            console.log(error);
-            return false;
-        }
-    }
-
-    static async changeChannelAllow(userID: string, groupID: string, newAllow: string[]) {
-        try {
-            const result = await RoleMongoModel.updateOne(
-                {
-                    _id: {
-                        userID: userID,
-                        groupID: groupID
-                    }
-                }, {
-                    allowChannel: newAllow
-                });
-            console.log(result);
-            return true;
-        } catch (error) {
-            console.log(error);
-            return false;
-        }
+        
+        
     }
 }
 

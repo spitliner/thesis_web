@@ -2,27 +2,30 @@ import express from 'express';
 
 const GroupRouter = express.Router();
 
-GroupRouter.get("", (request, response) => {
+GroupRouter.put('/creation', (request, response) => {
     try {
         
-    } catch (err) {
-        
+    } catch (error) {
+        console.log(error);
+        return response.status(500).json({error: "Unexpected server error"});
     }
 });
 
-GroupRouter.put("", (request, response) => {
+GroupRouter.get('/settings', (request, response) => {
     try {
         
-    } catch (err) {
-        
+    } catch (error) {
+        console.log(error);
+        return response.status(500).json({error: "Unexpected server error"});
     }
 });
 
-GroupRouter.post("/:id/settings", (request, response) => {
+GroupRouter.post('/settings', (request, response) => {
     try {
         
-    } catch (err) {
-        
+    } catch (error) {
+        console.log(error);
+        return response.status(500).json({error: "Unexpected server error"});
     }
 });
 

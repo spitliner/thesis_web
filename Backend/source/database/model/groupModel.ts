@@ -10,27 +10,36 @@ const uidGen = customAlphabet(alphabet, 12);
 
 class GroupModel {
     static async getGroup(groupID: string) {
-        return GroupMongoModel.findById(groupID).select("-__v");
+        return GroupMongoModel.findById(groupID, "-__v -_id").exec();
+    }
+
+    static async getGroupData(groupID: string) {
+        return GroupMongoModel.findById(groupID, "-__v -_id").lean().exec();
     }
 
     static async findGroup(groupName: string) {
         return GroupMongoModel.find({
-            $text: {
-                $search: groupName
+            "$text": {
+                "$search": groupName
             },
             private: false
-        }).select("-__v");
+        }, "-__v").lean().exec();
+    }
+
+    static async checkGroupID(groupID: string) {
+        return 0 !== await GroupMongoModel.countDocuments({
+            id: groupID
+        }).lean().exec();
     }
 
     static async createGroup(groupName : string, isPrivate: boolean) {
         try {
             const groupID = uidGen();
             const result = await GroupMongoModel.insertMany([{
-                _id: groupID,
+                id: groupID,
                 name: groupName,
                 private: isPrivate
             }]);
-            console.log(result);
             return result[0];
         } catch (error) {
             console.log(error);
@@ -41,8 +50,8 @@ class GroupModel {
     static async deleteGroup(groupID: string) {
         try {
             const result = await GroupMongoModel.deleteOne({
-                _id: groupID
-            });
+                id: groupID
+            }).lean().exec();
             console.log(result);
             return true;
         } catch (error) {
@@ -51,39 +60,33 @@ class GroupModel {
         }
     }
 
-    static async changeSearchAble(groupID: string, newSetting : boolean) {
+    static async changeGroupName(groupID: string, newName: string) {
         try {
-            const result = await GroupMongoModel.updateOne(
-                {
-                    _id: groupID
-                }, {
-                    private: newSetting
-                }, {
-                    "new": true
-                });
-            console.log(result);
+            const group = await GroupModel.getGroup(groupID);
+            if (null === group) {
+                return false;
+            }
+            group.name = newName;
+            await group.save();
             return true;
         } catch (error) {
             console.log(error);
-            return false;
+            return null;
         }
     }
 
-    static async changeSettings(groupID: string, newSetting : boolean) {
+    static async changeGroupSettings (groupID: string, newSettings: {[key: string]: unknown}) {
         try {
-            const result = await GroupMongoModel.updateOne(
-                {
-                    _id: groupID
-                }, {
-                    settings: newSetting
-                }, {
-                    "new": true
-                });
-            console.log(result);
+            const group = await GroupModel.getGroup(groupID);
+            if (null === group) {
+                return false;
+            }
+            group.settings = JSON.stringify(newSettings);
+            await group.save();
             return true;
         } catch (error) {
             console.log(error);
-            return false;
+            return null;
         }
     }
 }

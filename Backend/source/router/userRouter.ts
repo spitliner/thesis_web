@@ -58,4 +58,17 @@ UserRouter.post("/self/settings", async (request, response) => {
     }
 });
 
+
+UserRouter.post("/self/password", async (request, response) => {
+    try {
+        if (undefined === request.body.settings) {
+            return response.status(400)
+        }
+        const result = await UserController.setSetting(request.cookies['uid'], request.body.settings);
+    } catch (error) {
+        console.log(error);
+        return response.status(500).json({"error": "sunexpected server error"})
+    }
+});
+
 export default UserRouter;
